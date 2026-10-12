@@ -37,6 +37,33 @@ function play(turns: [Evaluation, Grade | null][]): DecideOutput[] {
   });
 }
 
+describe('revisiting a topic', () => {
+  it('does not open with an explanation the student has already had, nor the same first question', () => {
+    const first = openConcept(concept);
+    const again = openConcept(concept, [], first.state.strategiesUsed);
+    expect(again.decision.strategyId).not.toBe(first.decision.strategyId);
+    expect(again.state.itemId).not.toBe(first.state.itemId);
+    expect(again.state.strategiesUsed).toContain(first.decision.strategyId);
+  });
+
+  it('cycles instead of failing when every strategy has been used', () => {
+    const all = concept.strategies.map((s) => s.id);
+    expect(openConcept(concept, [], all).decision.strategyId).toBeTruthy();
+  });
+
+  it('applies when moving on to a concept that was parked in an earlier session', () => {
+    const prior = [nextConcept!.strategies[0]!.id];
+    let state = openConcept(concept).state;
+    let out: DecideOutput | null = null;
+    for (const grade of ['correct', 'correct'] as const) {
+      out = decide({ concept, nextConcept, nextPriorStrategies: prior, state, evaluation: said(), grade });
+      state = out.state;
+    }
+    expect(out!.decision.action).toBe('move_on');
+    expect(out!.decision.strategyId).not.toBe(prior[0]);
+  });
+});
+
 describe('moving on', () => {
   it('needs two correct checks, and asks a different question for the second', () => {
     const [first, second] = play([[said(), 'correct'], [said(), 'correct']]);

@@ -32,6 +32,8 @@ export interface DecideInput {
   concept: Concept;
   /** The concept that follows this one for this student, or null if this is the last. */
   nextConcept: Concept | null;
+  /** Strategies already used with this student on `nextConcept`, from earlier sessions. */
+  nextPriorStrategies?: string[];
   state: TutorState;
   evaluation: Evaluation;
   /** Grade of evaluation.answer against the current item. Null when there is no item to grade (probe phase). */
@@ -71,15 +73,16 @@ function pickItem(pool: Item[], used: string[]): Item {
   return pool.find((i) => !used.includes(i.id)) ?? pool[used.length % pool.length]!;
 }
 
-function initialState(concept: Concept, boardIds: string[]): TutorState {
-  const strategy = concept.strategies[0]!;
-  const item = concept.items[0]!;
+function initialState(concept: Concept, boardIds: string[], prior: string[]): TutorState {
+  // A topic being revisited must not open with the explanation that already failed to land.
+  const strategy = pickStrategy(concept, prior, null);
+  const item = concept.items[prior.length % concept.items.length]!;
   return {
     conceptId: concept.id,
     phase: 'check',
     itemId: item.id,
     usedItemIds: [item.id],
-    strategiesUsed: [strategy.id],
+    strategiesUsed: [...new Set([...prior, strategy.id])],
     correct: 0,
     wrong: 0,
     hints: 0,
@@ -91,9 +94,16 @@ function initialState(concept: Concept, boardIds: string[]): TutorState {
   };
 }
 
-/** First turn of a concept: teach with the first strategy, then ask the first check. */
-export function openConcept(concept: Concept, boardIds: string[] = []): { decision: Decision; state: TutorState } {
-  const state = initialState(concept, boardIds);
+/**
+ * First turn of a concept: teach, then ask the first check.
+ * `prior` is the strategies this student has already been taught this concept with in earlier sessions.
+ */
+export function openConcept(
+  concept: Concept,
+  boardIds: string[] = [],
+  prior: string[] = [],
+): { decision: Decision; state: TutorState } {
+  const state = initialState(concept, boardIds, prior);
   return {
     state,
     decision: {
@@ -103,7 +113,7 @@ export function openConcept(concept: Concept, boardIds: string[] = []): { decisi
       counterfactual: null,
       conceptId: concept.id,
       nextConceptId: null,
-      strategyId: state.strategiesUsed[0]!,
+      strategyId: state.strategiesUsed.at(-1)!,
       itemId: state.itemId,
       evidence: { gradedItemId: null, expected: null, grade: null, misconception: null, correct: 0, wrong: 0 },
       policyVersion: POLICY_VERSION,
@@ -140,7 +150,7 @@ export function hasAnswer(a: ExtractedAnswer): boolean {
 }
 
 export function decide(input: DecideInput): DecideOutput {
-  const { concept, nextConcept, state, evaluation, grade } = input;
+  const { concept, nextConcept, nextPriorStrategies = [], state, evaluation, grade } = input;
   const item = findItem(concept, state.itemId);
   const misconception =
     evaluation.misconception && concept.misconceptions[evaluation.misconception] ? evaluation.misconception : null;
@@ -369,7 +379,7 @@ export function decide(input: DecideInput): DecideOutput {
     evidence: Decision['evidence'],
     what = '',
   ): DecideOutput {
-    const opened = nextConcept ? openConcept(nextConcept, state.boardIds) : null;
+    const opened = nextConcept ? openConcept(nextConcept, state.boardIds, nextPriorStrategies) : null;
     const s: TutorState = opened?.state ?? { ...state, phase: 'done', itemId: null, pending: null };
     const onward = nextConcept ? `moving to "${nextConcept.title}"` : 'wrapping up, since that was the last topic';
     const reason =

@@ -60,7 +60,7 @@ pnpm install
 cp .env.example .env     # add OPENROUTER_API_KEY
 pnpm dev                 # starts api + web
 pnpm test                # unit tests, no key needed
-pnpm eval                # regression eval suite, 12 scenarios x 3 runs
+pnpm eval                # regression eval suite, 13 scenarios x 3 runs
 pnpm eval:mutation       # the suite must fail against deliberately worse prompts
 pnpm simulate            # LLM-played students; add --persona=struggling for one
 pnpm eval --offline      # fallback-path scenarios only, no key needed
@@ -96,7 +96,7 @@ pnpm eval --offline      # fallback-path scenarios only, no key needed
 
 ### Day 3 — Evals, failure handling, simulations
 
-- [x] Write 8–12 deep eval scenarios. *(12, each says which regression it catches)*
+- [x] Write 8–12 deep eval scenarios. *(13, each says which regression it catches)*
 - [x] Implement `pnpm eval` runner with structured assertions.
 - [x] Add failure evals: timeout, invalid JSON, provider down.
 - [x] Implement retry, JSON repair, circuit breaker, offline fallback.
@@ -214,7 +214,7 @@ Rules are simple and explainable, and live in `packages/shared/src/policy.ts` wi
 - A correct answer given with no reasoning is probed ("how did you get that?") before it counts.
 - If wrong or partial: `reteach` with a strategy not used before, choosing the one mapped to the misconception first, and ask a new question.
 - Second miss: `scaffold` with a smaller, guided check. Passing it returns to a full question.
-- Third miss: `needs_review`. Move on, mark the concept weak, and revisit it at the start of the next session.
+- Third miss: `needs_review`. Move on, mark the concept weak, and revisit it at the start of the next session, opening with an explanation and a question the student has not had.
 - Correct answers reset after a miss, so mastery means correct checks in a row after the last re-teach.
 - "I don't know" and "just tell me the answer" get hints, not answers; a miss is counted only when the hints run out.
 - If the evaluator was not confident it heard correctly, confirm or ask again. A transcript the tutor was not sure of is never graded.
@@ -259,6 +259,7 @@ Scenarios:
 - Instructions hidden in an answer, and skip requests, change nothing.
 - A garbled or unsettled answer is not marked wrong.
 - "Just tell me the answer" gets hints; the third "I don't know" re-teaches.
+- Quadratic formula: a sign slip under the root is named and corrected.
 - Word problem: both roots given, negative one not rejected.
 - An equivalent answer form is accepted.
 - LLM timeout and garbage fall back safely.
@@ -275,6 +276,7 @@ Scenarios:
 - STT failure: the browser's recogniser, then the text box.
 - TTS failure: the browser's voice, and the text is always on screen.
 - A failed turn commits nothing: progress and state are exactly as before, and the tutor says so.
+- A model line with a JSON typo keeps its sentence and loses only its board changes; one bad line never ends the reply.
 - Generated speech is rejected if it contains symbols, markup or runs long. Board operations that point at nothing are dropped, and equations that do not render are dropped, rather than the sentence.
 - Faults can be injected per request from the debug drawer, or for the whole process with `FAULT_INJECT`.
 

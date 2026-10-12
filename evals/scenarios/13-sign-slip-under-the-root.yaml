@@ -1,0 +1,28 @@
+id: sign-slip-under-the-root
+catches: >-
+  The quadratic formula module only being tested on the happy path. A sign slip under the root
+  (subtracting a negative as if it were positive) is the commonest formula error, and the one a
+  generic "check your signs" reply fails to address.
+concept: quadratic_formula
+given:
+  itemId: qf_under_root
+  usedItemIds: [qf_basic, qf_under_root]
+turns:
+  - student: >-
+      b squared is four, and four a c is four times three times minus one, which is minus twelve.
+      So it's four minus twelve, which is minus eight.
+    expect:
+      intent: answer
+      grade: wrong
+      action: reteach
+      misconception: [sign_under_root]
+      strategy_in: [signs_first]
+      strategy_is_new: true
+      item_is_new: true
+      ends_with_question: true
+      degraded: []
+      judge:
+        - >-
+          The tutor identifies the specific slip: subtracting minus twelve is the same as adding twelve
+          (or equivalent), giving sixteen.
+        - The tutor acknowledges that the student's working for b squared and for four a c was right.

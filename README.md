@@ -22,7 +22,7 @@ Without an API key it still runs, in offline mode: explanations come from the au
 | Command | What it does | Needs a key |
 |---|---|---|
 | `pnpm test` | Unit tests: grader, policy, curriculum, orchestrator, failure paths | no |
-| `pnpm eval` | Regression suite: 12 scenarios × 3 runs against the real models, compared with `evals/baseline.json` | yes |
+| `pnpm eval` | Regression suite: 13 scenarios × 3 runs against the real models, compared with `evals/baseline.json` | yes |
 | `pnpm eval --offline` | The scenarios that exercise the fallback paths only | no |
 | `pnpm eval:mutation` | Runs the suite against deliberately worse prompts and fails if any of them pass | yes |
 | `pnpm simulate` | LLM-played student personas with hidden knowledge states; reports false-advance rate and invariant violations | yes |

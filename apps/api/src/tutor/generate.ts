@@ -3,6 +3,7 @@ import type { Trace } from '../observability/trace';
 import type { ChatRequest, ChatResult } from '../providers/llm';
 import { ProviderError, sleep } from '../providers/resilience';
 import { type LlmDeps, fill, parseJsonLoose } from './calls';
+import { logEvent } from '../observability/trace';
 import { guardSegment } from './guards';
 
 /**
@@ -13,7 +14,8 @@ import { guardSegment } from './guards';
  * always match the answer the grader expects.
  */
 export type GenerateMode = 'feedback' | 'reteach';
-const MAX_SEGMENTS: Record<GenerateMode, number> = { feedback: 2, reteach: 6 };
+// A re-teach has to reach the answer, which takes more lines than the reference script alone.
+const MAX_SEGMENTS: Record<GenerateMode, number> = { feedback: 2, reteach: 10 };
 
 export interface GenerateInput {
   mode: GenerateMode;
@@ -62,6 +64,18 @@ function buildRequest(deps: LlmDeps, input: GenerateInput): ChatRequest {
   };
 }
 
+/** Pulls the spoken sentence out of a line that is not valid JSON. Returns null if there is none. */
+export function salvageSay(line: string): { say: string; board: [] } | null {
+  const match = /"say"\s*:\s*("(?:[^"\\]|\\.)*")/.exec(line);
+  if (!match) return null;
+  try {
+    const say = JSON.parse(match[1]!) as string;
+    return say.trim() ? { say, board: [] } : null;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Streams one JSON segment per line from the generator, checking each line as
  * it completes so the first sentence can be spoken while the rest is written.
@@ -94,11 +108,15 @@ export async function generateWithLlm(
       try {
         json = parseJsonLoose(text);
       } catch {
-        return void (stopped = true);
+        // One typo in a line of JSON must not end the reply: keep the sentence, lose only its board changes.
+        json = salvageSay(text);
+        if (json === null) return void trace.degrade('generator:guard');
+        logEvent('generator_line_repaired', { chars: text.length });
       }
       const guarded = guardSegment(json, boardIds);
       if (guarded.problems.length > 0) trace.degrade('generator:guard');
-      if (!guarded.segment) return void (stopped = true);
+      // A rejected sentence is skipped rather than ending the reply: the answer is usually in a later one.
+      if (!guarded.segment) return void trace.degrade('generator:guard');
       boardIds = guarded.boardIds;
       segments.push(guarded.segment);
       trace.mark('first_segment_ms');

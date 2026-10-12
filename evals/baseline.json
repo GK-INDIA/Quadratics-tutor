@@ -1,6 +1,6 @@
 {
-  "at": "2026-10-12T05:18:53.085Z",
-  "promptVersion": "v1:4b0ca19e",
+  "at": "2026-10-12T13:01:48.882Z",
+  "promptVersion": "v1:3928a754",
   "models": {
     "evaluator": "google/gemini-2.5-flash",
     "generator": "google/gemini-2.5-flash",
@@ -8,14 +8,14 @@
       "openai/gpt-4.1-mini"
     ],
     "judge": "openai/gpt-4.1",
-    "stt": "openai/gpt-4o-mini-transcribe",
-    "tts": "deepgram/aura-2"
+    "stt": "openai/whisper-large-v3-turbo",
+    "tts": "google/gemini-3.8-flash-tts"
   },
   "runs": 3,
   "offline": false,
   "passRates": {
     "advance-on-understanding": 1,
-    "reteach-targets-misconception": 1,
+    "reteach-targets-misconception": 0.6666666666666666,
     "second-miss-gets-new-approach": 1,
     "lucky-guess-is-probed": 1,
     "negative-discriminant-misconception": 1,
@@ -25,7 +25,8 @@
     "asks-for-answer-gets-hint": 1,
     "word-problem-rejects-negative": 1,
     "equivalent-forms-accepted": 1,
-    "provider-failure-degrades-safely": 1
+    "provider-failure-degrades-safely": 1,
+    "sign-slip-under-the-root": 0.6666666666666666
   },
-  "costUsd": 0.09017803
+  "costUsd": 0.11186805
 }

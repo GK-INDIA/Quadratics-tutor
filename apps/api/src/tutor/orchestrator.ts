@@ -280,7 +280,7 @@ export function createTutor(deps: TutorDeps) {
       const student = repo.upsertStudent(input.studentId, input.name.trim().slice(0, 60) || 'Student');
       const progress = repo.getProgress(student.id, conceptIds());
       const concept = nextOpenConcept(progress, 0) ?? CONCEPTS[0]!; // everything mastered: start a fresh pass
-      const opened = openConcept(concept);
+      const opened = openConcept(concept, [], progress.find((p) => p.conceptId === concept.id)?.strategiesUsed ?? []);
       const trace = new Trace();
       const events: TurnEvent[] = [];
       const emit: Emit = (e) => events.push(e);
@@ -383,7 +383,15 @@ export function createTutor(deps: TutorDeps) {
             // 2. Is it right? Code decides, not the model.
             if (evaluation.intent === 'answer' && state.phase === 'check' && item) grade = gradeAnswer(item.answer, evaluation.answer);
             // 3. What happens next? The policy decides, and records why.
-            out = decide({ concept, nextConcept: nextOpenConcept(progress, concept.order), state, evaluation, grade });
+            const nextConcept = nextOpenConcept(progress, concept.order);
+            out = decide({
+              concept,
+              nextConcept,
+              nextPriorStrategies: progress.find((p) => p.conceptId === nextConcept?.id)?.strategiesUsed,
+              state,
+              evaluation,
+              grade,
+            });
             // Reasoning cannot be checked without the model. Keep the lesson moving, but do not record
             // mastery on answers alone: the topic is confirmed at the start of the next session instead.
             if (grader !== 'code' && out.conceptClosed === 'mastered') {

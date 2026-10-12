@@ -70,6 +70,23 @@ describe('a normal session', () => {
     expect(s2.events[0]).toMatchObject({ decision: { action: 'teach', conceptId: CONCEPTS[1]!.id } });
   });
 
+  it('opens a parked topic next session with a different explanation than the one that failed', async () => {
+    // One wrong answer per question: yes/no, then yes/no again, then a number for the scaffold question.
+    const wrong = [no(), yes(), evaluation({ answer: { numbers: ['7'] } })];
+    const { tutor } = setup({ evaluate: (n) => wrong[n]! });
+    const s1 = await tutor.startSession({ name: 'A', voice: 'none' });
+    await turn(tutor, s1.sessionId, 't1', 'no');
+    await turn(tutor, s1.sessionId, 't2', 'yes');
+    const parked = await turn(tutor, s1.sessionId, 't3', 'seven');
+    expect(parked.decision.action).toBe('needs_review');
+
+    const s2 = await tutor.startSession({ name: 'A', studentId: s1.studentId, voice: 'none' });
+    const opening = s2.events[0];
+    expect(opening).toMatchObject({ decision: { action: 'teach', conceptId: first.id } });
+    if (opening?.type !== 'decision') throw new Error('unreachable');
+    expect(opening.decision.strategyId).not.toBe(first.strategies[0]!.id);
+  });
+
   it('re-teaches with generated speech, keeps the generated board ops, and asks a new question', async () => {
     const reteach = [
       '{"say": "Not quite. You decided before simplifying.", "board": []}',
@@ -205,6 +222,20 @@ describe('provider failure', () => {
     expect(out.decision).toMatchObject({ action: 'move_on', reasonCode: 'mastery_unverified' });
     expect(out.progress[0]!.status).toBe('needs_review');
     expect(out.said.at(-1)).toBe(CONCEPTS[1]!.items[0]!.say); // the lesson still moves on
+  });
+
+  it('keeps the sentence from a line with a JSON typo, and every line after it', async () => {
+    const lines = [
+      '{"say": "You subtracted a negative as if it were positive.", "board": []}',
+      '{"say": "So four minus minus twelve is four plus twelve.", "board": [{"op": equation", "id": "s2", "latex": "4+12"}]}',
+      '{"say": "Which is sixteen.", "board": []}',
+    ].join('\n');
+    const { tutor } = setup({ evaluate: () => no(), generate: () => lines });
+    const { sessionId } = await tutor.startSession({ name: 'A', voice: 'none' });
+    const out = await turn(tutor, sessionId, 't1', 'no');
+    expect(out.said).toContain('So four minus minus twelve is four plus twelve.');
+    expect(out.said).toContain('Which is sixteen.');
+    expect(out.degraded).not.toContain('generator:cut_short');
   });
 
   it('falls back to the script when the generator returns garbage, without losing the decision', async () => {
