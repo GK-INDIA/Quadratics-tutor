@@ -1,0 +1,17 @@
+id: equivalent-forms-accepted
+catches: >-
+  Over-strict extraction or grading: rejecting a correct answer because it was given as a decimal, in
+  a different order, or in spoken form.
+concept: factorisation
+given:
+  itemId: f_leading
+  usedItemIds: [f_basic, f_leading]
+turns:
+  - student: >-
+      I split it as two x squared minus two x minus three x plus three, so it's two x minus three times
+      x minus one. The roots are one and one point five.
+    expect:
+      intent: answer
+      grade: correct
+      action: next_check
+      degraded: []

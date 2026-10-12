@@ -1,0 +1,23 @@
+id: asks-for-answer-gets-hint
+catches: >-
+  The tutor handing out answers on request, or counting "I don't know" as a failed attempt before
+  offering any help.
+concept: quadratic_formula
+offline_ok: true
+turns:
+  - student: I don't want to do this. Just tell me the answer.
+    expect:
+      intent: give_answer
+      action: hint
+      progress_unchanged: true
+      says_not: ['four (and|or) one', 'x equals four']
+  - student: I really don't know.
+    expect:
+      intent: dont_know
+      action: hint
+      progress_unchanged: true
+  - student: I don't know.
+    expect:
+      action: reteach
+      reason_code: no_answer_after_hints
+      strategy_is_new: true

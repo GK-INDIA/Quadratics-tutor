@@ -1,4 +1,4 @@
-import type { AnswerSpec, ExtractedAnswer, Grade } from './schemas';
+import { type AnswerSpec, type ExtractedAnswer, type Grade, OTHER_CHOICE } from './schemas';
 
 // Decimal answers to irrational roots are accepted to two places.
 const TOLERANCE = 0.01;
@@ -40,6 +40,7 @@ export function grade(spec: AnswerSpec, answer: ExtractedAnswer): Grade {
 
     case 'choice': {
       if (answer.choice === null) return 'ungradable';
+      if (answer.choice === OTHER_CHOICE) return 'wrong'; // e.g. "two negative roots" when asked for the nature of the roots
       if (!spec.options.includes(answer.choice)) return 'ungradable';
       return answer.choice === spec.value ? 'correct' : 'wrong';
     }

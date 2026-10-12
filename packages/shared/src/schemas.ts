@@ -34,6 +34,9 @@ export const ExtractedAnswer = z.object({
 });
 export type ExtractedAnswer = z.infer<typeof ExtractedAnswer>;
 
+/** Choice the evaluator returns when the student clearly answered, but with none of the offered options. Always graded wrong. */
+export const OTHER_CHOICE = 'other';
+
 export const EMPTY_ANSWER: ExtractedAnswer = { boolean: null, numbers: null, coefficients: null, choice: null };
 
 export const AnswerSpec = z.discriminatedUnion('type', [

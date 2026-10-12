@@ -1,0 +1,56 @@
+# Simulated students. Each has a hidden knowledge state the tutor never sees:
+# `learns_after` is how many re-teaches a concept takes before the student
+# really understands it (0 = already understands, 99 = will not get it today).
+# Comparing that hidden state with what the tutor concluded gives the
+# false-advance rate, which no amount of transcript-reading can.
+
+- id: strong
+  description: A confident, well-prepared student who answers quickly and explains each step.
+  learns_after: { default: 0 }
+  explains: true
+
+- id: terse
+  description: A capable but very quiet student. Answers in as few words as possible and never explains unless asked.
+  learns_after: { default: 0 }
+  explains: false
+
+- id: careless-signs
+  description: Understands the ideas but rushes and makes sign errors. Explains their working.
+  learns_after: { default: 0, factorisation: 1, quadratic_formula: 1 }
+  misconception: { factorisation: factor_signs, quadratic_formula: sign_under_root }
+  explains: true
+
+- id: misconception-holder
+  description: A hard-working student with two firmly held wrong ideas. Explains their reasoning, which is how the wrong ideas show.
+  learns_after: { default: 0, standard_form: 1, discriminant: 2 }
+  misconception: { standard_form: judges_before_simplifying, discriminant: negative_means_negative_roots }
+  explains: true
+
+- id: guesser
+  description: Does not really follow the lesson and guesses. Often lands on the right answer but cannot say why.
+  learns_after: { default: 0, roots: 99, factorisation: 99 }
+  explains: false
+  lucky_guess: 0.7
+
+- id: anxious
+  description: Nervous and quick to say "I don't know", but gets there with a second explanation. Speaks hesitantly.
+  learns_after: { default: 1 }
+  explains: true
+  dont_know: 0.35
+
+- id: distracted
+  description: Bright but keeps drifting off the topic, asks to skip ahead, and sometimes tries to tell the tutor what to do.
+  learns_after: { default: 0 }
+  explains: true
+  off_topic: 0.3
+
+- id: hinglish
+  description: Thinks in Hindi and answers in a mix of Hindi and English (Hinglish), with numbers in English. Explains briefly.
+  learns_after: { default: 0, word_problems: 1 }
+  misconception: { word_problems: keeps_negative }
+  explains: true
+
+- id: struggling
+  description: Finds algebra hard and needs things explained more than once, in small steps. Tries honestly each time.
+  learns_after: { default: 2 }
+  explains: true

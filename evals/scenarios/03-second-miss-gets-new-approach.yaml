@@ -1,0 +1,29 @@
+id: second-miss-gets-new-approach
+catches: >-
+  The re-teach ladder collapsing: re-using an explanation the student has already heard, re-asking the
+  same question, or never dropping to smaller steps after a second miss.
+concept: factorisation
+given:
+  wrong: 1
+  itemId: f_signs
+  usedItemIds: [f_basic, f_signs]
+  strategiesUsed: [split_middle_term, sum_product]
+turns:
+  - student: The roots are five and minus three.
+    expect:
+      grade: wrong
+      action: scaffold
+      misconception: [root_sign_flip, factor_signs]
+      strategy_in: [guided_steps]
+      strategy_is_new: true
+      item_is_new: true
+      ends_with_question: true
+      degraded: []
+      judge:
+        - The tutor makes clear, kindly, that the answer was not right. It does not praise the answer as correct.
+  - student: Two and three.
+    expect:
+      grade: correct
+      action: next_check
+      reason_code: scaffold_passed
+      item_is_new: true

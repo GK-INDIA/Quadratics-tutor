@@ -1,0 +1,23 @@
+id: lucky-guess-is-probed
+catches: >-
+  False mastery. Moving a student on because they said the right words, when they guessed or reasoned
+  wrongly. This is the failure a lenient prompt or model produces first.
+concept: discriminant
+given:
+  correct: 1
+  itemId: d_nature_negative
+  usedItemIds: [d_nature_zero, d_nature_negative]
+turns:
+  - student: No real roots.
+    expect:
+      grade: correct
+      action: probe
+      reason_code: correct_without_reasoning
+      concept_status: in_progress
+  - student: Um, because all the numbers in it are positive, so nothing can make it zero I think.
+    expect:
+      action: reteach
+      reason_code: answer_not_supported
+      concept_status: in_progress
+      strategy_is_new: true
+      ends_with_question: true

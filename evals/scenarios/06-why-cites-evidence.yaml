@@ -1,0 +1,18 @@
+id: why-cites-evidence
+catches: >-
+  The tutor no longer being able to explain its own decision from the actual evidence, or the evaluator
+  ceasing to recognise a "why" question and grading it as an answer.
+concept: roots
+turns:
+  - student: No. Three squared is six, and six minus three minus six is minus three, not zero.
+    expect:
+      grade: wrong
+      action: reteach
+      misconception: [arithmetic_slip, negative_squared]
+  - student: Why are we doing this again?
+    expect:
+      intent: why
+      action: explain_why
+      progress_unchanged: true
+      says: ['nine minus three minus six', 'different way', "if you'd got it right"]
+      ends_with_question: true

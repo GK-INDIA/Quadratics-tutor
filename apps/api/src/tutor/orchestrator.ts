@@ -215,7 +215,7 @@ export function createTutor(deps: TutorDeps) {
       case 'reprompt':
         speaker.say(
           decision.reasonCode === 'tutor_unavailable'
-            ? 'Sorry, I lost my train of thought for a moment. Could you say that once more?'
+            ? 'Sorry, I am having a little trouble just now. Please give me just your answer, as simply as you can.'
             : decision.reasonCode === 'nothing_heard'
               ? 'I did not hear anything. Could you say your answer again?'
               : 'I did not catch an answer there. Could you say it again, as simply as you can?',
@@ -383,6 +383,19 @@ export function createTutor(deps: TutorDeps) {
             if (evaluation.intent === 'answer' && state.phase === 'check' && item) grade = gradeAnswer(item.answer, evaluation.answer);
             // 3. What happens next? The policy decides, and records why.
             out = decide({ concept, nextConcept: nextOpenConcept(progress, concept.order), state, evaluation, grade });
+            // Reasoning cannot be checked without the model. Keep the lesson moving, but do not record
+            // mastery on answers alone: the topic is confirmed at the start of the next session instead.
+            if (grader !== 'code' && out.conceptClosed === 'mastered') {
+              out = {
+                ...out,
+                conceptClosed: 'needs_review',
+                decision: {
+                  ...out.decision,
+                  reasonCode: 'mastery_unverified',
+                  reason: `${out.decision.reason} Because of a technical problem I could not check your reasoning, so I will confirm this topic at the start of next session.`,
+                },
+              };
+            }
           }
         }
         trace.mark('decided_ms');

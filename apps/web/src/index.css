@@ -1,0 +1,18 @@
+@import 'tailwindcss';
+@import 'katex/dist/katex.min.css';
+
+body {
+  @apply bg-stone-100 text-stone-900 antialiased;
+}
+
+/* The whiteboard highlight: applied to a whole block or to one marked term inside an equation. */
+.board .hl {
+  background: #fde68a;
+  border-radius: 4px;
+  box-shadow: 0 0 0 3px #fde68a;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.board .katex {
+  font-size: 1.35em;
+}

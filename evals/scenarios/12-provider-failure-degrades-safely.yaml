@@ -1,0 +1,25 @@
+id: provider-failure-degrades-safely
+catches: >-
+  A provider outage corrupting progress or leaving the student in silence. The fallback path rotting
+  because nothing exercises it.
+concept: roots
+offline_ok: true
+turns:
+  - student: Yes
+    faults: llm_timeout:1
+    expect:
+      grade: correct
+      action: next_check
+      degraded_includes: [evaluator, generator]
+      ends_with_question: true
+  - student: well I think it sort of depends on what is inside the brackets
+    faults: llm_garbage:1
+    expect:
+      action: reprompt
+      reason_code: tutor_unavailable
+      progress_unchanged: true
+      says: ['just your answer']
+  - student: No, because four minus six plus one is minus one, not zero.
+    expect:
+      grade: correct
+      action: move_on

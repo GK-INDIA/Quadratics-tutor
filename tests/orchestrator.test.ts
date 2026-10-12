@@ -194,7 +194,17 @@ describe('provider failure', () => {
     const out = await turn(tutor, sessionId, 't1', 'hmm well the thing with the brackets maybe');
     expect(out.decision).toMatchObject({ action: 'reprompt', reasonCode: 'tutor_unavailable' });
     expect(repo.getSession(sessionId)!.state).toEqual(before);
-    expect(out.said[0]).toContain('lost my train of thought');
+    expect(out.said[0]).toContain('just your answer');
+  });
+
+  it('does not record mastery on answers it could not check the reasoning for', async () => {
+    const { tutor } = setup({ evaluate: () => timeout, generate: () => timeout });
+    const { sessionId } = await tutor.startSession({ name: 'A', voice: 'none' });
+    await turn(tutor, sessionId, 't1', 'yes');
+    const out = await turn(tutor, sessionId, 't2', 'no');
+    expect(out.decision).toMatchObject({ action: 'move_on', reasonCode: 'mastery_unverified' });
+    expect(out.progress[0]!.status).toBe('needs_review');
+    expect(out.said.at(-1)).toBe(CONCEPTS[1]!.items[0]!.say); // the lesson still moves on
   });
 
   it('falls back to the script when the generator returns garbage, without losing the decision', async () => {

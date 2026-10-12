@@ -1,0 +1,14 @@
+id: garbled-answer-is-confirmed
+catches: >-
+  Speech-recognition noise becoming failed attempts. Grading a transcript the evaluator could not
+  actually pin down, in either direction.
+concept: factorisation
+turns:
+  - student: it's two and, or minus two, and five, no wait, minus five
+    expect:
+      action: [confirm, reprompt]
+      progress_unchanged: true
+  - student: Sorry. The roots are two and five, because minus two and minus five multiply to ten and add to minus seven.
+    expect:
+      grade: correct
+      action: next_check

@@ -64,7 +64,8 @@ export function loadPrompts(dir: string): Prompts {
     .sort();
   const contents = new Map(files.map((f) => [f.replace(/\.md$/, ''), readFileSync(path.join(dir, f), 'utf8')]));
   const hash = createHash('sha256');
-  for (const [name, text] of contents) hash.update(name).update(text);
+  // Judge and simulator prompts are test tooling; changing them does not change the tutor.
+  for (const [name, text] of contents) if (!/^(judge|simulator)-/.test(name)) hash.update(name).update(text);
   return {
     version: `${path.basename(dir)}:${hash.digest('hex').slice(0, 8)}`,
     get(name) {

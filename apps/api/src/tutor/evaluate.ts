@@ -1,4 +1,4 @@
-import { type AnswerSpec, type Concept, Evaluation, type ExtractedAnswer, type Item, type TutorState } from '@tutor/shared';
+import { type AnswerSpec, type Concept, Evaluation, type ExtractedAnswer, type Item, OTHER_CHOICE, type TutorState } from '@tutor/shared';
 import type { Trace } from '../observability/trace';
 import { type LlmDeps, completeJson, fill } from './calls';
 
@@ -41,7 +41,7 @@ function describeSpec(spec: AnswerSpec | null): string {
     case 'coefficients':
       return 'the coefficients a, b, c -> answer.coefficients as three strings, signs included';
     case 'choice':
-      return `one of these options -> answer.choice, copied exactly: ${spec.options.join(', ')}`;
+      return `one of these options -> answer.choice, copied exactly: ${spec.options.join(', ')}. If the student clearly gave an answer that is none of these, use "${OTHER_CHOICE}"`;
   }
 }
 
@@ -105,7 +105,8 @@ export async function evaluateWithLlm(deps: LlmDeps, trace: Trace, input: Evalua
 /** Drops anything the model was not entitled to say, rather than trusting it. */
 export function sanitise(evaluation: Evaluation, concept: Concept, spec: AnswerSpec | null): Evaluation {
   const answer = { ...evaluation.answer };
-  if (answer.choice !== null && !(spec?.type === 'choice' && spec.options.includes(answer.choice))) answer.choice = null;
+  const allowed = spec?.type === 'choice' ? [...spec.options, OTHER_CHOICE] : [];
+  if (answer.choice !== null && !allowed.includes(answer.choice)) answer.choice = null;
   return {
     ...evaluation,
     answer,

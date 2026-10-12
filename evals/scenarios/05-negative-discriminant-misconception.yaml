@@ -1,0 +1,22 @@
+id: negative-discriminant-misconception
+catches: >-
+  Losing the specific correction for the most common discriminant error (negative D read as negative
+  roots), and failing to credit the part of an answer that was right.
+concept: discriminant
+given:
+  itemId: d_nature_negative
+  usedItemIds: [d_nature_zero, d_nature_negative]
+turns:
+  - student: The discriminant is four minus twenty, which is minus sixteen, so it has two negative roots.
+    expect:
+      grade: wrong
+      action: reteach
+      misconception: [negative_means_negative_roots]
+      strategy_in: [under_the_root]
+      ends_with_question: true
+      degraded: []
+      judge:
+        - >-
+          The tutor explicitly corrects the idea that a negative discriminant means negative roots, for
+          example by saying there are no real roots, or that the sign of D says nothing about the sign of the roots.
+        - The tutor acknowledges that the student's value for the discriminant, minus sixteen, was right.

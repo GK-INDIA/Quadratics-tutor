@@ -1,0 +1,27 @@
+id: reteach-targets-misconception
+catches: >-
+  Generic re-teaching. A generator that repeats the definition instead of addressing what this
+  student got wrong, or an evaluator that stops tagging the misconception so the wrong strategy is chosen.
+concept: standard_form
+turns:
+  - student: No, it's not a quadratic, because it doesn't equal zero. There's a five on the other side.
+    expect:
+      intent: answer
+      grade: wrong
+      action: reteach
+      misconception: [judges_before_simplifying]
+      strategy_in: [rearrange_first]
+      strategy_is_new: true
+      item_is_new: true
+      ends_with_question: true
+      highlights: true
+      degraded: []
+      says_not: ['\\', '\^']
+      judge:
+        - >-
+          Early in the reply, the tutor addresses the student's specific reasoning (that the equation
+          is not set equal to zero, or has a five on the other side), rather than only saying it is wrong.
+        - >-
+          The explanation is about rearranging or simplifying an equation before deciding, and is more
+          than a restatement of the definition "a x squared plus b x plus c equals zero".
+        - The tutor does not call the student's answer correct.

@@ -1,0 +1,25 @@
+id: advance-on-understanding
+catches: >-
+  An evaluator or policy change that stops recognising a correct, explained answer.
+  Over-strict grading traps strong students in re-teaching they do not need.
+concept: standard_form
+given:
+  correct: 1
+  itemId: sf_cancels_no
+  usedItemIds: [sf_rearrange_yes, sf_cancels_no]
+turns:
+  - student: >-
+      No, it's not. If I expand both sides I get x squared plus x plus eight equals x squared minus four,
+      and the x squared cancels, so it's just x plus twelve equals zero, which is linear.
+    expect:
+      intent: answer
+      grade: correct
+      action: move_on
+      reason_code: mastery_reached
+      concept_status: mastered
+      degraded: []
+      ends_with_question: true
+      says_not: ['\\', '\^']
+      judge:
+        - The tutor tells the student their answer is correct.
+        - The tutor does not go back over what standard form is before starting the next topic.

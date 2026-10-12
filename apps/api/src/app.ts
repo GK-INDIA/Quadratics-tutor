@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import rateLimit from '@fastify/rate-limit';
+import { CONCEPTS } from '@tutor/curriculum';
 import fastifyStatic from '@fastify/static';
 import Fastify, { type FastifyInstance } from 'fastify';
 import { z } from 'zod';
@@ -83,6 +84,7 @@ export async function buildServer(config: Config, overrides: Overrides = {}): Pr
   app.get('/api/config', async () => ({
     serverVoice: Boolean(config.openRouterKey),
     faultInjection: config.allowFaultInjection,
+    concepts: CONCEPTS.map((c) => ({ id: c.id, title: c.title })),
   }));
 
   app.post('/api/session', async (req) => {

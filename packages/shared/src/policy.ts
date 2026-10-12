@@ -297,7 +297,7 @@ export function decide(input: DecideInput): DecideOutput {
       state.scaffolding ? 'scaffold_passed' : 'first_check_correct',
       state.scaffolding
         ? 'You got the simpler question right, so I am going back to a full question to see if it holds.'
-        : `That's correct (${item?.expected ?? 'right answer'}). One right answer could be luck, so I'm asking a second question of a different kind before we move on.`,
+        : `That's correct${item ? `: ${item.expected}` : ''}. One right answer could be luck, so I'm asking a second question of a different kind before we move on.`,
       "If that had been wrong, I'd have explained the idea a different way.",
       s,
     );

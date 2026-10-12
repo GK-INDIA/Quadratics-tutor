@@ -1,0 +1,22 @@
+id: word-problem-rejects-negative
+catches: >-
+  Accepting an answer that is algebraically complete but wrong for the situation, or re-teaching
+  equation setup when the slip was in interpreting the result.
+concept: word_problems
+given:
+  itemId: w_rectangle
+  usedItemIds: [w_setup, w_rectangle]
+turns:
+  - student: >-
+      I let the width be x, so x times x plus two is forty eight. That gives x squared plus two x minus
+      forty eight equals zero, so x is six or minus eight. So the width is six or minus eight.
+    expect:
+      grade: wrong
+      action: reteach
+      misconception: [keeps_negative]
+      strategy_in: [check_the_story]
+      ends_with_question: true
+      degraded: []
+      judge:
+        - The tutor acknowledges that the student set up and solved the equation correctly.
+        - The tutor explains that minus eight must be rejected because a width cannot be negative.
