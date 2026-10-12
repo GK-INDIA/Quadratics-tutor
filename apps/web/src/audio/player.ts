@@ -64,7 +64,7 @@ export class Speaker {
 
   private playAudio(base64: string): Promise<void> {
     return new Promise((resolve, reject) => {
-      const el = new Audio(`data:audio/mpeg;base64,${base64}`);
+      const el = new Audio(`data:${base64.startsWith('UklGR') ? 'audio/wav' : 'audio/mpeg'};base64,${base64}`);
       this.current = el;
       el.onended = () => resolve();
       el.onpause = () => resolve(); // stop() pauses; do not leave the queue hanging

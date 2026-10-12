@@ -13,6 +13,8 @@ services:
         sync: false
       - key: APP_PASSCODE
         sync: false
+      - key: STT_TIMEOUT_MS
+        value: "40000"
       - key: DAILY_SPEND_CAP_USD
         value: "5"
       - key: ALLOW_FAULT_INJECTION

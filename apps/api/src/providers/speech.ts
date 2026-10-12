@@ -41,7 +41,26 @@ export function createOpenRouterSTT(config: SpeechConfig): STT {
   };
 }
 
+/** Gemini TTS only returns raw 24 kHz 16-bit mono PCM; wrap it so browsers can play it. */
+export function pcmToWav(pcm: Buffer, sampleRate = 24_000): Buffer {
+  const h = Buffer.alloc(44);
+  h.write('RIFF', 0);
+  h.writeUInt32LE(36 + pcm.length, 4);
+  h.write('WAVEfmt ', 8);
+  h.writeUInt32LE(16, 16);
+  h.writeUInt16LE(1, 20); // PCM
+  h.writeUInt16LE(1, 22); // mono
+  h.writeUInt32LE(sampleRate, 24);
+  h.writeUInt32LE(sampleRate * 2, 28);
+  h.writeUInt16LE(2, 32);
+  h.writeUInt16LE(16, 34);
+  h.write('data', 36);
+  h.writeUInt32LE(pcm.length, 40);
+  return Buffer.concat([h, pcm]);
+}
+
 export function createOpenRouterTTS(config: SpeechConfig): TTS {
+  const pcm = config.models.tts.startsWith('google/');
   return {
     async speak(text) {
       const res = await fetchWithTimeout(
@@ -49,7 +68,7 @@ export function createOpenRouterTTS(config: SpeechConfig): TTS {
         {
           method: 'POST',
           headers: auth(config),
-          body: JSON.stringify({ model: config.models.tts, input: text, voice: config.ttsVoice, response_format: 'mp3' }),
+          body: JSON.stringify({ model: config.models.tts, input: text, voice: config.ttsVoice, response_format: pcm ? 'pcm' : 'mp3' }),
         },
         config.timeouts.ttsMs,
       );
@@ -57,7 +76,7 @@ export function createOpenRouterTTS(config: SpeechConfig): TTS {
         throw new ProviderError('timeout', 'Audio did not finish downloading in time');
       }));
       if (bytes.length < 200) throw new ProviderError('garbage', 'Speech response was too small to be audio');
-      return bytes.toString('base64');
+      return (pcm ? pcmToWav(bytes) : bytes).toString('base64');
     },
   };
 }
