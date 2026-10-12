@@ -38,7 +38,7 @@ export function loadConfig(overrides: Partial<Config> = {}): Config {
       generator: env('MODEL_GENERATOR', 'google/gemini-2.5-flash'),
       fallbacks: list('MODEL_FALLBACKS', 'openai/gpt-4.1-mini'),
       judge: env('MODEL_JUDGE', 'openai/gpt-4.1'),
-      stt: env('MODEL_STT', 'microsoft/mai-transcribe-2'),
+      stt: env('MODEL_STT', 'openai/whisper-large-v3-turbo'),
       tts: env('MODEL_TTS', 'google/gemini-3.8-flash-tts'),
     },
     ttsVoice: env('TTS_VOICE', 'Kore'),
@@ -47,7 +47,7 @@ export function loadConfig(overrides: Partial<Config> = {}): Config {
     allowFaultInjection: env('ALLOW_FAULT_INJECTION', 'false') === 'true',
     faultInject: env('FAULT_INJECT', ''),
     promptDir: path.resolve(REPO_ROOT, env('PROMPT_DIR', './prompts/v1')),
-    timeouts: { sttMs: Number(env('STT_TIMEOUT_MS', '40000')), evaluateMs: 6000, firstTokenMs: 4000, generateMs: 15000, ttsMs: 6000 },
+    timeouts: { sttMs: Number(env('STT_TIMEOUT_MS', '10000')), evaluateMs: 6000, firstTokenMs: 4000, generateMs: 15000, ttsMs: 6000 },
     ...overrides,
   };
 }
