@@ -1,0 +1,12 @@
+{
+  "name": "@tutor/curriculum",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "index.ts",
+  "types": "index.ts",
+  "dependencies": {
+    "@tutor/shared": "workspace:*",
+    "zod": "^3.23.8"
+  }
+}

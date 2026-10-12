@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "types": [
+      "node"
+    ]
+  },
+  "include": [
+    "apps/api/src",
+    "packages/shared/src",
+    "curriculum",
+    "evals",
+    "simulations",
+    "tests"
+  ]
+}

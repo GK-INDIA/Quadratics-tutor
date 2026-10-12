@@ -1,0 +1,25 @@
+{
+  "name": "ai-tutor",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm --parallel --filter @tutor/api --filter @tutor/web dev",
+    "build": "pnpm --filter @tutor/web build",
+    "start": "pnpm --filter @tutor/api start",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json && pnpm --filter @tutor/web typecheck",
+    "eval": "tsx evals/runner.ts",
+    "eval:mutation": "tsx evals/mutation.ts",
+    "simulate": "tsx simulations/runner.ts"
+  },
+  "devDependencies": {
+    "@tutor/curriculum": "workspace:*",
+    "@tutor/shared": "workspace:*",
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0",
+    "yaml": "^2.6.0",
+    "zod": "^3.23.8"
+  }
+}
