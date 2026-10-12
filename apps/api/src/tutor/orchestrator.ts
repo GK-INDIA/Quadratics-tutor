@@ -92,6 +92,7 @@ export function createTutor(deps: TutorDeps) {
           voice === 'server'
             ? deps.tts.speak(segment.say).catch((err) => {
                 trace.degrade(failureLabel('tts', err)); // the client falls back to its own speech synthesis
+                logEvent('tts_failed', { message: (err as Error).message, chars: segment.say.length });
                 return undefined;
               })
             : Promise.resolve(undefined);

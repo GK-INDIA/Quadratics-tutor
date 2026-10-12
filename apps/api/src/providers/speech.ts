@@ -72,9 +72,12 @@ export function createOpenRouterTTS(config: SpeechConfig): TTS {
         },
         config.timeouts.ttsMs,
       );
-      const bytes = Buffer.from(await res.arrayBuffer().catch(() => {
-        throw new ProviderError('timeout', 'Audio did not finish downloading in time');
-      }));
+      const bytes = Buffer.from(
+        await res.arrayBuffer().catch((err: Error) => {
+          // Keep the cause: a dropped connection and a deadline need different fixes.
+          throw new ProviderError(err.name === 'TimeoutError' ? 'timeout' : 'network', `Audio download failed: ${err.name}: ${err.message}`);
+        }),
+      );
       if (bytes.length < 200) throw new ProviderError('garbage', 'Speech response was too small to be audio');
       return (pcm ? pcmToWav(bytes) : bytes).toString('base64');
     },

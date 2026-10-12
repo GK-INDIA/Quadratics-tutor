@@ -47,7 +47,7 @@ export function loadConfig(overrides: Partial<Config> = {}): Config {
     allowFaultInjection: env('ALLOW_FAULT_INJECTION', 'false') === 'true',
     faultInject: env('FAULT_INJECT', ''),
     promptDir: path.resolve(REPO_ROOT, env('PROMPT_DIR', './prompts/v1')),
-    timeouts: { sttMs: Number(env('STT_TIMEOUT_MS', '10000')), evaluateMs: 6000, firstTokenMs: 4000, generateMs: 15000, ttsMs: 6000 },
+    timeouts: { sttMs: Number(env('STT_TIMEOUT_MS', '10000')), evaluateMs: 6000, firstTokenMs: 4000, generateMs: 15000, ttsMs: Number(env('TTS_TIMEOUT_MS', '15000')) },
     ...overrides,
   };
 }

@@ -91,28 +91,32 @@ The admin page (`/#admin`) shows the headline numbers, real and simulated sessio
 
 ## Latency
 
-Where the time goes in one turn, in order. These are estimates from provider documentation and the design, **to be replaced with measured p50/p95 from the deployed app** (the debug drawer and admin page show them):
+Measured on 12 Oct 2026 from a laptop in India to OpenRouter, with the shipped models (Whisper Large V3 Turbo, Gemini 2.5 Flash, Gemini 3.8 Flash TTS), 11 real turns through the running server with server-side voice. This is a small sample and it was not taken from the deployed instance; **re-measure on Render** with the debug drawer and the admin page, which report the same fields.
 
-| Stage | Estimate | Notes |
+| Stage | Measured | Notes |
 |---|---|---|
 | Endpointing | 0 | Tap to stop; no silence detection to wait for |
-| Audio conversion + upload | 100–300 ms | Resampled to 16 kHz mono in the browser |
-| STT | 300–800 ms | |
-| Evaluator LLM | 300–700 ms | Small JSON reply, fast model, temperature 0 |
-| Grader + policy | < 1 ms | Code |
-| Generator, first sentence | 400–900 ms | Streamed |
-| TTS, first sentence | 300–700 ms | |
+| STT (Whisper Large V3 Turbo) | about 0.8 s for a 2 s clip, 2.6 s for a 10 s clip | Plus audio conversion and upload in the browser |
+| Evaluator LLM | p50 1.6 s, p95 2.9 s | Small JSON reply at temperature 0 |
+| Grader + policy | under 1 ms | Code |
+| Generator, first sentence | arrives at p50 2.6 s after the turn starts (includes the evaluator) | Streamed |
+| TTS (Gemini 3.8 Flash), one sentence | 3.5 to 4 s alone; up to 6 s with six sentences in parallel | Raw PCM, wrapped as WAV |
+| **Turn start → first audio ready, server side** | **p50 6.1 s, p95 10.9 s** | Add STT and network for what the student feels |
+
+So the voice loop is slow: roughly 7 to 9 s from the end of the student's speech to the first tutor audio when the turn needs generated speech. About 4 s of that is TTS, and about 3 s is the two LLM calls. Turns that skip the generator (a hint, a redirect, a re-ask) come back in 1.2 to 6 s, and are faster when the text was spoken before and its audio is cached.
+
+An earlier run with `deepgram/aura-2` TTS took 6 to 8 s per sentence; `minimax/speech-2.8-turbo` and `x-ai/grok-voice-tts-1.0` measured 1.2 to 1.6 s and 0.9 to 2.7 s for one sentence in isolation, and about 3 s each with five in parallel. Switching TTS model is a one-line environment change and is the single largest win available.
 
 What is done about it:
 
 - **The evaluator and generator are separate calls on purpose.** The decision is known after the short evaluator call and is sent to the client immediately.
-- **The generator streams one JSON line per sentence.** Each line is validated and sent to TTS as soon as it completes, so the first sentence is being spoken while the rest is still being written. TTS for all sentences runs concurrently and is played in order.
+- **The generator streams one JSON line per sentence.** Each line is validated and sent to TTS as soon as it completes, so the first sentence is being synthesised while the rest is still being written. TTS for all sentences runs concurrently and is played in order.
 - **Most of what the tutor says is not generated at all.** Opening explanations, check questions, hints, confirmations and "why" answers are authored or built by code. They skip the generator entirely, and their audio is cached by text, so repeated lines cost no TTS time.
 - **The board changes when the sentence starts, not when the turn ends.** Each sentence carries its own board operations, so the student sees writing and highlighting in step with the voice.
 - **Perceived latency.** The student's transcript appears as soon as it is known. If nothing has been said 1.5 s after they finish, the status line shows "Got it, let me think…". Tapping the microphone stops the tutor mid-sentence.
-- **One retry, not several.** Each stage has its own timeout (STT 8 s, evaluator 6 s, generator first token 4 s, TTS 6 s per sentence) and one jittered retry; after that the scripted fallback speaks. A circuit breaker stops a dead provider from costing a full timeout on every turn.
+- **One retry, not several.** Each stage has its own timeout (STT 10 s, evaluator 6 s, generator first token 4 s, TTS 15 s per sentence) and one jittered retry; after that the scripted fallback speaks. The TTS limit is generous because Gemini TTS needs about 4 s per sentence; at 6 s, four of eleven turns in the first measurement fell back to the browser voice. A circuit breaker stops a dead provider from costing a full timeout on every turn.
 
-Next steps, in order of expected gain: streaming STT so the evaluator can start before the student finishes; a speculative evaluator call on the interim transcript; streaming audio within a sentence instead of whole-sentence clips.
+Next steps, in order of expected gain: a faster TTS model; splitting long first sentences so audio starts sooner; streaming STT so the evaluator can start before the student finishes; a speculative evaluator call on the interim transcript; streaming audio within a sentence instead of whole-sentence clips.
 
 ## Metrics
 
