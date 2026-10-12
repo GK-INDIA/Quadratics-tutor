@@ -15,6 +15,7 @@ Fields:
 - answer: fill only the field named under "Answer type", exactly as the student gave it. Leave the others null. If they gave no usable answer, all four are null.
   - Extract what the student *said*, even when it is wrong. Do not correct it. Do not copy the correct answer.
   - Numbers as strings: "3", "-2", "3/2", "1.5". "minus three" is "-3". Give every number they offered as the answer, and none they merely mentioned while working.
+  - If the student corrects themselves ("no wait", "I mean", "sorry, actually"), the correction replaces what it corrects. Give only the final answer. If it is not clear what replaces what, or they list alternatives without settling ("two or minus two, and five or minus five"), set confidence to 0.4 or lower rather than listing every number they said.
   - If an answer is awaiting confirmation and the student confirms it ("yes", "that's right"), return that answer with confidence 1. If they correct it, return the corrected answer.
 - showedReasoning: true only if they explained *how* (a step, a substitution, a rule applied), not if they only stated a result or said "because it is".
 - reasoningSound: if showedReasoning, is the method mathematically valid for this question? Otherwise null.

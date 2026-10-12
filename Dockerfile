@@ -1,6 +1,8 @@
 # One image: the API serves the built web app.
 FROM node:22-slim
 ENV PNPM_HOME=/pnpm PATH=/pnpm:$PATH
+# Build tools are only needed if better-sqlite3 has no prebuilt binary for this platform.
+RUN apt-get update && apt-get install -y --no-install-recommends python3 make g++ && rm -rf /var/lib/apt/lists/*
 RUN corepack enable
 WORKDIR /app
 

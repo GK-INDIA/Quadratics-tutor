@@ -53,7 +53,9 @@ export function createOpenRouterTTS(config: SpeechConfig): TTS {
         },
         config.timeouts.ttsMs,
       );
-      const bytes = Buffer.from(await res.arrayBuffer());
+      const bytes = Buffer.from(await res.arrayBuffer().catch(() => {
+        throw new ProviderError('timeout', 'Audio did not finish downloading in time');
+      }));
       if (bytes.length < 200) throw new ProviderError('garbage', 'Speech response was too small to be audio');
       return bytes.toString('base64');
     },

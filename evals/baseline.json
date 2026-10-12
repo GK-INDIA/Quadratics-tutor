@@ -1,1 +1,31 @@
-{ "passRates": {} }
+{
+  "at": "2026-10-12T05:18:53.085Z",
+  "promptVersion": "v1:4b0ca19e",
+  "models": {
+    "evaluator": "google/gemini-2.5-flash",
+    "generator": "google/gemini-2.5-flash",
+    "fallbacks": [
+      "openai/gpt-4.1-mini"
+    ],
+    "judge": "openai/gpt-4.1",
+    "stt": "openai/gpt-4o-mini-transcribe",
+    "tts": "deepgram/aura-2"
+  },
+  "runs": 3,
+  "offline": false,
+  "passRates": {
+    "advance-on-understanding": 1,
+    "reteach-targets-misconception": 1,
+    "second-miss-gets-new-approach": 1,
+    "lucky-guess-is-probed": 1,
+    "negative-discriminant-misconception": 1,
+    "why-cites-evidence": 1,
+    "injection-changes-nothing": 1,
+    "garbled-answer-is-confirmed": 0.6666666666666666,
+    "asks-for-answer-gets-hint": 1,
+    "word-problem-rejects-negative": 1,
+    "equivalent-forms-accepted": 1,
+    "provider-failure-degrades-safely": 1
+  },
+  "costUsd": 0.09017803
+}

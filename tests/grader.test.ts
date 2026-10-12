@@ -32,6 +32,13 @@ describe('grade: roots', () => {
   it('marks one of two roots as partial, not wrong', () => expect(grade(spec, numbers('2'))).toBe('partial'));
   it('marks a sign error as wrong', () => expect(grade(spec, numbers('-2', '-3'))).toBe('wrong'));
   it('marks one right and one wrong root as wrong', () => expect(grade(spec, numbers('2', '5'))).toBe('wrong'));
+  it('does not grade a list with more values than the question has answers', () => {
+    expect(grade(spec, numbers('2', '-2', '3', '-3'))).toBe('ungradable');
+    expect(grade(spec, numbers('2', '3', '5'))).toBe('ungradable');
+  });
+  it('still grades both roots given for a one-answer word problem as wrong, not unclear', () => {
+    expect(grade({ type: 'numbers', values: ['6'] }, numbers('6', '-8'))).toBe('wrong');
+  });
   it('cannot grade a missing or unparseable answer', () => {
     expect(grade(spec, EMPTY_ANSWER)).toBe('ungradable');
     expect(grade(spec, numbers('two-ish'))).toBe('ungradable');

@@ -144,7 +144,7 @@ async function main() {
     const reteaches: Record<string, number> = {};
     const understands = (conceptId: string) => (reteaches[conceptId] ?? 0) >= need(conceptId);
     const violations: string[] = [];
-    const stats = { turns: 0, mastered: 0, needsReview: 0, falseAdvance: 0, falseHold: 0, reteaches: 0, degraded: 0 };
+    const stats = { turns: 0, mastered: 0, needsReview: 0, falseAdvance: 0, falseHold: 0, reteaches: 0, degraded: 0, studentErrors: 0 };
 
     const started = await tutor.startSession({ name: `sim:${persona.id}`, voice: 'none', isSimulated: true });
     let tutorSaid = started.events.flatMap((e) => (e.type === 'segment' ? [e.segment.say] : [])).join(' ');
@@ -160,7 +160,9 @@ async function main() {
 
       let said = p.offline;
       if (!offline) {
-        const reply = await studentLlm.complete({
+        // The simulated student is test tooling: a flaky call to it retries once and then uses the scripted line,
+        // so one bad response does not throw away a whole session.
+        const ask = () => studentLlm.complete({
           purpose: 'simulate',
           model: config.models.generator,
           fallbacks: config.models.fallbacks,
@@ -177,7 +179,11 @@ async function main() {
           temperature: 0.8,
           timeoutMs: 20_000,
         });
-        said = reply.text.trim();
+        try {
+          said = (await ask().catch(() => ask())).text.trim();
+        } catch {
+          stats.studentErrors += 1;
+        }
       }
 
       const events: TurnEvent[] = [];

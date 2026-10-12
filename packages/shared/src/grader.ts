@@ -52,6 +52,10 @@ export function grade(spec: AnswerSpec, answer: ExtractedAnswer): Grade {
       if (given === null || want === null) return 'ungradable';
       const g = dedupe(given);
       const w = dedupe(want);
+      // A quadratic has at most two roots, so three or more distinct values means the student is listing candidates
+      // or is mid-correction, not committed to an answer. Ask again instead of marking it wrong.
+      // (Two values for a one-answer word problem are not "unclear": a root that does not fit the story is a real error.)
+      if (g.length > Math.max(w.length, 2)) return 'ungradable';
       const hits = g.filter((x) => w.some((y) => close(x, y))).length;
       if (hits < g.length) return 'wrong'; // at least one value that is not a root
       return hits === w.length ? 'correct' : 'partial'; // e.g. one of two roots

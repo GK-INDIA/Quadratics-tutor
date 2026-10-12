@@ -1,13 +1,14 @@
 id: garbled-answer-is-confirmed
 catches: >-
-  Speech-recognition noise becoming failed attempts. Grading a transcript the evaluator could not
-  actually pin down, in either direction.
+  An unsettled spoken answer (several candidates, no commitment) being graded as a failed attempt.
+  Marking noise wrong teaches a student that guessing out loud is penalised, and wastes a re-teach.
 concept: factorisation
 turns:
-  - student: it's two and, or minus two, and five, no wait, minus five
+  - student: Um, the roots are two and, uh, five, or maybe seven, I can't remember which one it was
     expect:
       action: [confirm, reprompt]
       progress_unchanged: true
+      degraded: []
   - student: Sorry. The roots are two and five, because minus two and minus five multiply to ten and add to minus seven.
     expect:
       grade: correct

@@ -1,4 +1,4 @@
-import { type BoardOp, Segment, applyToIds, toKatex } from '@tutor/shared';
+import { type BoardOp, Segment, applyToIds, partId, toKatex } from '@tutor/shared';
 import katex from 'katex';
 
 export const MAX_WORDS_PER_SEGMENT = 45;
@@ -47,6 +47,11 @@ export function guardSegment(raw: unknown, boardIds: string[]): Guarded {
         problems.push(`dropped equation ${op.id}: ${error}`);
         continue;
       }
+    }
+    // A highlight of a part that was never marked still points at something real: light the whole line.
+    if (op.op === 'highlight' && op.part && ids.includes(op.target) && !ids.includes(partId(op.target, op.part))) {
+      kept.push({ op: 'highlight', target: op.target });
+      continue;
     }
     const applied = applyToIds(ids, [op]);
     if (applied.error) {
