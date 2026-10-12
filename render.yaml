@@ -1,0 +1,19 @@
+# Render Blueprint: New > Blueprint > pick this repo. Render builds the Dockerfile and sets PORT itself.
+services:
+  - type: web
+    name: quadratics-tutor
+    runtime: docker
+    plan: free
+    region: singapore
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      # Entered in the Render dashboard, never committed.
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: APP_PASSCODE
+        sync: false
+      - key: DAILY_SPEND_CAP_USD
+        value: "5"
+      - key: ALLOW_FAULT_INJECTION
+        value: "true"

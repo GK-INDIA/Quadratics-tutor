@@ -14,7 +14,7 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm build
 
-# The SQLite file lives on a mounted volume so it survives deploys.
+# Mount a volume at /data to keep the SQLite file across deploys (Render's free plan has none).
 ENV NODE_ENV=production PORT=8080 DB_PATH=/data/tutor.db
 EXPOSE 8080
 CMD ["pnpm", "start"]

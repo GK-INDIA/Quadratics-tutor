@@ -163,6 +163,7 @@ async function main() {
         const reply = await studentLlm.complete({
           purpose: 'simulate',
           model: config.models.generator,
+          fallbacks: config.models.fallbacks,
           system: prompts.get('simulator-system'),
           user: fill(prompts.get('simulator-user'), {
             persona: persona.description,

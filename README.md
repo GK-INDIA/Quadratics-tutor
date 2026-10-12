@@ -65,14 +65,13 @@ The same faults can be set for the whole process with `FAULT_INJECT=llm_timeout:
 
 ## Deploy
 
-One Docker image; the API serves the built web app. SQLite lives on a mounted volume.
+One Docker image; the API serves the built web app. It is deployed on Render's free plan from [render.yaml](render.yaml):
 
-```bash
-fly launch --no-deploy --copy-config
-fly volumes create tutor_data --size 1
-fly secrets set OPENROUTER_API_KEY=... APP_PASSCODE=...
-fly deploy
-```
+1. In Render, choose **New > Blueprint** and pick this repository.
+2. Enter `OPENROUTER_API_KEY` and `APP_PASSCODE` when prompted.
+3. Point a free uptime monitor at `/api/health` every 10 minutes, so the service does not sleep.
+
+Two limits of the free plan: the service sleeps after 15 minutes without traffic (the monitor avoids this), and there is no persistent disk, so the SQLite file, and with it student progress and session replays, is lost whenever the instance restarts or redeploys. On any host with a volume, set `DB_PATH` to a path on it.
 
 `APP_PASSCODE` protects the public link, and `DAILY_SPEND_CAP_USD` switches the tutor to offline mode once the day's spend reaches the cap.
 
